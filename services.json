@@ -1,0 +1,20 @@
+{
+    "Services" : [
+        {
+            "Name": "google get",
+            "Protocol": "http",
+            "URI": "www.google.com",
+            "Path": "status",
+            "Port": 80,
+            "Method": "GET"
+        },
+        {
+            "Name": "google post",
+            "Protocol": "http",
+            "URI": "www.google.com",
+            "Port": 80,
+            "Method": "POST",
+            "RequestTest": "{ \"name\": \"value\" } "
+        }
+    ]
+}
