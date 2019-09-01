@@ -4,7 +4,7 @@
             "Name": "google get",
             "Protocol": "http",
             "URI": "www.google.com",
-            "Path": "status",
+            "Path": "maps",
             "Port": 80,
             "Method": "GET"
         },
@@ -12,6 +12,7 @@
             "Name": "google post",
             "Protocol": "http",
             "URI": "www.google.com",
+            "Path": "maps",
             "Port": 80,
             "Method": "POST",
             "RequestTest": "{ \"name\": \"value\" } "
