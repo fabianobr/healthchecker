@@ -1,4 +1,4 @@
-package healthchecker
+package main
 
 import (
 	"bytes"
@@ -32,7 +32,6 @@ type Service struct {
 }
 
 func doCheckService(service *Service) {
-
 	service.StatusTime = time.Now()
 
 	var completeURL string
@@ -146,5 +145,4 @@ func main() {
 	doHealthCheck(services.Services)
 
 	startHTTPServer(&services)
-
 }
