@@ -1,4 +1,4 @@
-package healthchecker
+package main
 
 import (
 	"bytes"
@@ -28,15 +28,14 @@ type Service struct {
 	Method      string `json:"Method"`
 	RequestTest string `json:"RequestTest"`
 	StatusTime  time.Time
+	StatusCode	int
 	StatusText  string
 }
 
 func doCheckService(service *Service) {
-
 	service.StatusTime = time.Now()
 
-	var completeURL string
-	completeURL = fmt.Sprintf("%s://%s:%d/%s", service.Protocol, service.URI, service.Port, service.Path)
+	completeURL := fmt.Sprintf("%s://%s:%d/%s", service.Protocol, service.URI, service.Port, service.Path)
 
 	var resp *http.Response
 	var err error
@@ -53,13 +52,8 @@ func doCheckService(service *Service) {
 
 		client := &http.Client{}
 		resp, err = client.Do(req)
-
 	} else {
 		resp, err = http.Get(completeURL)
-	}
-
-	if resp != nil {
-		defer resp.Body.Close() // Memory management
 	}
 
 	if err != nil {
@@ -67,16 +61,24 @@ func doCheckService(service *Service) {
 		return
 	}
 
-	service.StatusText = strconv.Itoa(resp.StatusCode) + " " + http.StatusText(resp.StatusCode)
+	service.StatusCode = 0;
+	if resp == nil {
+		service.StatusText = "no response"
+	} else {
+		service.StatusCode = resp.StatusCode
+		service.StatusText = strconv.Itoa(resp.StatusCode) + " " + http.StatusText(resp.StatusCode)
 
-	//=================================================
-	// READ THE BODY EVEN THE DATA IS NOT IMPORTANT
-	// THIS MUST TO DO, TO AVOID MEMORY LEAK WHEN REUSING HTTP
-	// CONNECTION
-	//=================================================
-	_, err = io.Copy(ioutil.Discard, resp.Body) // WE READ THE BODY
-	if err != nil {
-		return
+		defer resp.Body.Close() // Memory management
+
+		//=================================================
+		// READ THE BODY EVEN THE DATA IS NOT IMPORTANT
+		// THIS MUST TO DO, TO AVOID MEMORY LEAK WHEN REUSING HTTP
+		// CONNECTION
+		//=================================================
+		_, err = io.Copy(ioutil.Discard, resp.Body) // WE READ THE BODY
+		if err != nil {
+			return
+		}
 	}
 }
 
@@ -133,7 +135,9 @@ func materializeServices(services *Services) {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	err = json.Unmarshal(byteValue, &services)
 	if err != nil {
+		fmt.Print("Error loading services: ")
 		fmt.Println(err)
+		return
 	}
 	fmt.Println("Services loaded.")
 	return
@@ -146,5 +150,4 @@ func main() {
 	doHealthCheck(services.Services)
 
 	startHTTPServer(&services)
-
 }
